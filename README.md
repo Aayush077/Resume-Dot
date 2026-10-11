@@ -21,7 +21,7 @@ _Built with cutting-edge technologies and AI integration:_
 
 ## LIVE - DEMO 🌐
 
-Visit the [_LINK ](https://resume-dot-beryl.vercel.app/)
+[Visit the site](https://resume-dot-beryl.vercel.app/)
 
 | User Interface | Dashboard              |
 | -------------- | ---------------------- |
@@ -459,37 +459,6 @@ We welcome contributions from the community! Here's how you can help:
 - Use meaningful commit messages
 - Write comprehensive tests
 - Update documentation accordingly
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** - see the [LICENSE](https://github.com/elyse502/resume-builder/blob/main/LICENSE) file for details.
-
----
-
-## Support
-
-For support, email _elyseniyibizi502@gmail.com_ or create an issue in the GitHub repository.
-
----
-
-## 📞 Contact
-
-For any questions or support, please contact:
-
-- [**NIYIBIZI Elysée**](https://linktr.ee/niyibizi_elysee)👨🏿‍💻 | [Github](https://github.com/elyse502) | [Linkedin](https://www.linkedin.com/in/niyibizi-elys%C3%A9e/) | [Twitter](https://twitter.com/Niyibizi_Elyse).
-- **Email**: <elyseniyibizi502@gmail.com>
-
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/niyibizi-elys%C3%A9e/) [![@phenrysay](https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/Niyibizi_Elyse) [![pH-7](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/elyse502)
-
----
-
-<div align="center">
-
-**RESUME BUILDER PRO** - Your career success starts with a standout resume! 🚀
-
-_Built with passion and cutting-edge technology to help job seekers worldwide._
 
 [⬆ Back to Top](#table-of-contents)
 
