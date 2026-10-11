@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📜 RESUME BUILDER PRO 🚀
+# 📜 RESUME DOT 🚀
 
 AI-Powered Professional Resume Builder with Real-time Optimization
 
@@ -21,7 +21,7 @@ _Built with cutting-edge technologies and AI integration:_
 
 ## LIVE - DEMO 🌐
 
-Visit the 👉 [_LINK 🔗_](https://resume-builder-roan-phi.vercel.app)
+Visit the [_LINK ](https://resume-dot-beryl.vercel.app/)
 
 | User Interface | Dashboard              |
 | -------------- | ---------------------- |
@@ -53,7 +53,7 @@ Visit the 👉 [_LINK 🔗_](https://resume-builder-roan-phi.vercel.app)
 
 ## 🌟 Project Overview
 
-**RESUME BUILDER PRO** is a sophisticated, AI-powered web application designed to revolutionize resume creation. This full-stack MERN application combines modern web technologies with artificial intelligence to provide:
+**RESUME DOT** is a sophisticated, AI-powered web application designed to revolutionize resume creation. This full-stack MERN application combines modern web technologies with artificial intelligence to provide:
 
 - 🎨 **Professional Templates**: Multiple ATS-friendly resume designs
 - 🤖 **AI Optimization**: Intelligent content enhancement using OpenAI
