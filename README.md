@@ -4,9 +4,7 @@
 
 AI-Powered Professional Resume Builder with Real-time Optimization
 
-![Last Commit](https://img.shields.io/github/last-commit/elyse502/resume-builder?style=flat-square)
 ![Languages](https://img.shields.io/github/languages/top/elyse502/resume-builder?style=flat-square&color=blue)
-![License](https://img.shields.io/badge/license-ISC-blue?style=flat-square)
 ![Version](https://img.shields.io/badge/version-1.0.0-success?style=flat-square)
 
 _Built with cutting-edge technologies and AI integration:_
