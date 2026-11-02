@@ -159,7 +159,6 @@ export const uploadResume = async (req, res) => {
 
 
 import Resume from "../models/Resume.js";
-import crypto from "node:crypto";
 
 const MODEL = "gemini-3.6-flash";
 
@@ -174,14 +173,6 @@ const generateAIContent = async (
 ) => {
   const apiKey = process.env.GEMINI_API_KEY;
 
-  console.log("Gemini key diagnostic:", {
-  loaded: Boolean(apiKey),
-  length: apiKey?.length,
-  prefix: apiKey?.slice(0, 3),
-  fingerprint: apiKey
-    ? crypto.createHash("sha256").update(apiKey).digest("hex").slice(0, 12)
-    : "missing",
-});
 
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY is missing from environment variables");
