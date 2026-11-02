@@ -1,3 +1,4 @@
+
 import imageKit from "../configs/imageKit.js";
 import Resume from "../models/Resume.js";
 import fs from "fs";
@@ -9,77 +10,89 @@ export const createResume = async (req, res) => {
     const userId = req.userId;
     const { title } = req.body;
 
-    // create new resume
     const newResume = await Resume.create({ userId, title });
 
-    // return success message
-    return res
-      .status(201)
-      .json({ message: "Resume created successfully", resume: newResume });
+    return res.status(201).json({
+      message: "Resume created successfully",
+      resume: newResume,
+    });
   } catch (error) {
+    console.error("Create resume error:", error);
     return res.status(400).json({ message: error.message });
   }
 };
 
 // Controller for deleting a resume
-// DELETE: /api/resumes/delete
+// DELETE: /api/resumes/delete/:resumeId
 export const deleteResume = async (req, res) => {
   try {
     const userId = req.userId;
     const { resumeId } = req.params;
 
-    // delete resume
-    await Resume.findOneAndDelete({ userId, _id: resumeId });
+    const deletedResume = await Resume.findOneAndDelete({
+      userId,
+      _id: resumeId,
+    });
 
-    // return success message
-    return res.status(200).json({ message: "Resume deleted successfully" });
+    if (!deletedResume) {
+      return res.status(404).json({ message: "Resume not found" });
+    }
+
+    return res.status(200).json({
+      message: "Resume deleted successfully",
+    });
   } catch (error) {
+    console.error("Delete resume error:", error);
     return res.status(400).json({ message: error.message });
   }
 };
 
-// Controller for getting user resume by id
-// GET: /api/resumes/get
+// Controller for getting user resume by ID
+// GET: /api/resumes/get/:resumeId
 export const getResumeById = async (req, res) => {
   try {
     const userId = req.userId;
     const { resumeId } = req.params;
 
-    // get resume
-    const resume = await Resume.findOne({ userId, _id: resumeId });
+    const resume = await Resume.findOne({
+      userId,
+      _id: resumeId,
+    });
 
     if (!resume) {
       return res.status(404).json({ message: "Resume not found" });
     }
 
-    // hide fields
-    resume.__v = undefined; // hide __v field
-    resume.createdAt = undefined; // hide createdAt field
-    resume.updatedAt = undefined; // hide updatedAt field
+    // Hide internal fields
+    resume.__v = undefined;
+    resume.createdAt = undefined;
+    resume.updatedAt = undefined;
 
-    // return resume
     return res.status(200).json({ resume });
   } catch (error) {
+    console.error("Get resume error:", error);
     return res.status(400).json({ message: error.message });
   }
 };
 
-// Controller for getting resume by id public
-// GET: /api/resumes/public
+// Controller for getting a public resume by ID
+// GET: /api/resumes/public/:resumeId
 export const getPublicResumeById = async (req, res) => {
   try {
     const { resumeId } = req.params;
 
-    // get resume
-    const resume = await Resume.findOne({ public: true, _id: resumeId });
+    const resume = await Resume.findOne({
+      public: true,
+      _id: resumeId,
+    });
 
     if (!resume) {
       return res.status(404).json({ message: "Resume not found" });
     }
 
-    // return resume
     return res.status(200).json({ resume });
   } catch (error) {
+    console.error("Get public resume error:", error);
     return res.status(400).json({ message: error.message });
   }
 };
@@ -87,19 +100,37 @@ export const getPublicResumeById = async (req, res) => {
 // Controller for updating a resume
 // PUT: /api/resumes/update
 export const updateResume = async (req, res) => {
+  const image = req.file;
+
   try {
     const userId = req.userId;
     const { resumeId, resumeData, removeBackground } = req.body;
-    const image = req.file;
+
+    if (!resumeId || !resumeData) {
+      return res.status(400).json({
+        message: "Resume ID and resume data are required",
+      });
+    }
 
     let resumeDataCopy;
+
     if (typeof resumeData === "string") {
-      resumeDataCopy = await JSON.parse(resumeData);
+      resumeDataCopy = JSON.parse(resumeData);
     } else {
       resumeDataCopy = structuredClone(resumeData);
     }
 
+    if (!resumeDataCopy || typeof resumeDataCopy !== "object") {
+      return res.status(400).json({
+        message: "Invalid resume data",
+      });
+    }
+
     if (image) {
+      if (!resumeDataCopy.personal_info) {
+        resumeDataCopy.personal_info = {};
+      }
+
       const imageBufferData = fs.createReadStream(image.path);
 
       const response = await imageKit.files.upload({
@@ -116,15 +147,42 @@ export const updateResume = async (req, res) => {
       resumeDataCopy.personal_info.image = response.url;
     }
 
-    const resume = await Resume.findByIdAndUpdate(
-      { userId, _id: resumeId },
+    const resume = await Resume.findOneAndUpdate(
+      {
+        userId,
+        _id: resumeId,
+      },
       resumeDataCopy,
-      { new: true }
+      {
+        new: true,
+        runValidators: true,
+      }
     );
 
-    // return success message and updated resume
-    return res.status(200).json({ message: "Saved successfully", resume });
+    if (!resume) {
+      return res.status(404).json({
+        message: "Resume not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Saved successfully",
+      resume,
+    });
   } catch (error) {
-    return res.status(400).json({ message: error.message });
+    console.error("Update resume error:", error);
+
+    return res.status(400).json({
+      message: error.message,
+    });
+  } finally {
+    // Delete the temporary file saved by Multer
+    if (image?.path) {
+      fs.unlink(image.path, (error) => {
+        if (error) {
+          console.error("Temporary image cleanup failed:", error);
+        }
+      });
+    }
   }
 };

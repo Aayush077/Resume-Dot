@@ -1,14 +1,19 @@
+
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import Resume from "../models/Resume.js";
 
 const generateToken = (userId) => {
-  const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
-    expiresIn: "7d",
-  });
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET is not configured");
+  }
 
-  return token;
+  return jwt.sign(
+    { userId },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
 };
 
 // Controller for user registration
@@ -17,35 +22,58 @@ export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // check it required fields are present
     if (!name || !email || !password) {
-      return res.status(400).json({ message: "Missing required fields" });
+      return res.status(400).json({
+        message: "Missing required fields",
+      });
     }
 
-    // check if user already exists
-    const user = await User.findOne({ email });
-    if (user) {
-      return res.status(400).json({ message: "User already exists" });
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Check if user already exists
+    const existingUser = await User.findOne({
+      email: normalizedEmail,
+    });
+
+    if (existingUser) {
+      return res.status(400).json({
+        message: "User already exists",
+      });
     }
 
-    // create new user
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Create new user
     const newUser = await User.create({
-      name,
-      email,
+      name: name.trim(),
+      email: normalizedEmail,
       password: hashedPassword,
     });
 
-    // return success message
     const token = generateToken(newUser._id);
-    newUser.password = undefined; // hide password
 
-    return res
-      .status(201)
-      .json({ message: "User created successfully", token, user: newUser });
+    // Return user without password
+    const safeUser = newUser.toObject();
+    delete safeUser.password;
+
+    return res.status(201).json({
+      message: "User created successfully",
+      token,
+      user: safeUser,
+    });
   } catch (error) {
-    return res.status(400).json({ message: error.message });
+    console.error("Registration error:", error);
+
+    if (error.code === 11000) {
+      return res.status(409).json({
+        message: "User already exists",
+      });
+    }
+
+    return res.status(400).json({
+      message: error.message,
+    });
   }
 };
 
@@ -55,45 +83,74 @@ export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // check if user already exists
-    const user = await User.findOne({ email });
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password are required",
+      });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Explicitly retrieve password hash for comparison
+    const user = await User.findOne({
+      email: normalizedEmail,
+    }).select("+password");
+
     if (!user) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(401).json({
+        message: "Invalid email or password",
+      });
     }
 
-    // check if password is correct
-    if (!user.comparePassword(password)) {
-      return res.status(400).json({ message: "Invalid email or password" });
+    // Verify password
+    if (!(await user.comparePassword(password))) {
+      return res.status(401).json({
+        message: "Invalid email or password",
+      });
     }
 
-    // return success message
     const token = generateToken(user._id);
-    user.password = undefined; // hide password
 
-    return res.status(200).json({ message: "Login successful", token, user });
+    // Return user without password
+    const safeUser = user.toObject();
+    delete safeUser.password;
+
+    return res.status(200).json({
+      message: "Login successful",
+      token,
+      user: safeUser,
+    });
   } catch (error) {
-    return res.status(400).json({ message: error.message });
+    console.error("Login error:", error);
+
+    return res.status(400).json({
+      message: error.message,
+    });
   }
 };
 
-// Controller for getting user by id
+// Controller for getting user by ID
 // GET: /api/users/data
 export const getUserById = async (req, res) => {
   try {
     const userId = req.userId;
 
-    // check if user exists
     const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({
+        message: "User not found",
+      });
     }
 
-    // return user
-    user.password = undefined; // hide password
+    // Password is excluded automatically by select: false
     return res.status(200).json(user);
   } catch (error) {
-    return res.status(400).json({ message: error.message });
+    console.error("Get user error:", error);
+
+    return res.status(400).json({
+      message: error.message,
+    });
   }
 };
 
@@ -103,11 +160,14 @@ export const getUserResumes = async (req, res) => {
   try {
     const userId = req.userId;
 
-    // return user resumes
     const resumes = await Resume.find({ userId });
 
     return res.status(200).json({ resumes });
   } catch (error) {
-    return res.status(400).json({ message: error.message });
+    console.error("Get user resumes error:", error);
+
+    return res.status(400).json({
+      message: error.message,
+    });
   }
 };
